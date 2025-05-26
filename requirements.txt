@@ -1,0 +1,34 @@
+# Core dependencies
+python-dotenv>=1.0.0
+langchain>=0.1.0
+langchain-core>=0.1.0
+langchain-groq>=0.0.1
+langgraph>=0.0.19
+
+torch
+torchvision
+torchaudio
+opencv-python
+requests
+python-dotenv
+langgraph
+langchain_groq
+fastapi
+uvicorn
+python-multipart
+streamlit
+pandas
+timm
+facenet-pytorch
+tqdm
+Pillow # Explicitly add Pillow, though it's a dependency of torchvision/facenet-pytorch
+
+# For visualization
+matplotlib>=3.7.0
+pandas>=2.0.0
+
+# For API and web interface
+fastapi>=0.100.0
+uvicorn>=0.22.0
+python-multipart>=0.0.6
+streamlit>=1.24.0

@@ -1,0 +1,46 @@
+# Ignore Python cache and temporary files
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Ignore environment files
+.env
+.env.*
+
+# Ignore IDE/editor settings
+.vscode/
+.idea/
+*.swp
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore model weight files
+*.pth
+
+# Ignore logs and output
+*.log
+logs/
+output/
+
+# Byte-compiled files
+*.pyo
+*.pyd
+
+# Ignore test coverage files
+.coverage
+.cache/
+nosetests.xml
+coverage.xml
+*.cover
+
+# Ignore LFS-tracked files (optional, if using Git LFS for .pth instead)
+# deepfake_detector_checkpoint.pth

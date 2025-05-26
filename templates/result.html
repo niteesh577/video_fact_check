@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}DeepFake Detection - Results{% endblock %}
+
+{% block content %}
+<div class="header text-center">
+    <h1>DeepFake Detection Results</h1>
+    <p class="lead">Analysis results for: {{ filename }}</p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <!-- Verdict Card -->
+        <div class="card mb-4">
+            <div class="card-header {% if verdict == 'REAL' %}bg-success{% else %}bg-danger{% endif %} text-white">
+                <h3 class="mb-0">Verdict: {{ verdict }}</h3>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-center mb-4">
+                    <div class="verdict-badge {% if verdict == 'REAL' %}badge-real{% else %}badge-fake{% endif %}">
+                        {% if verdict == 'REAL' %}
+                            <i class="bi bi-check-circle-fill"></i> AUTHENTIC
+                        {% else %}
+                            <i class="bi bi-exclamation-triangle-fill"></i> DEEPFAKE
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <a href="{{ url_for('index') }}" class="btn btn-primary">Analyze Another Video</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tabs for different sections -->
+        <div class="card">
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs" id="result-tabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab" aria-controls="summary" aria-selected="true">Summary</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="analysis-tab" data-bs-toggle="tab" data-bs-target="#analysis" type="button" role="tab" aria-controls="analysis" aria-selected="false">Detailed Analysis</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="json-tab" data-bs-toggle="tab" data-bs-target="#json" type="button" role="tab" aria-controls="json" aria-selected="false">JSON Data</button>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <div class="tab-content" id="result-tabs-content">
+                    <!-- Summary Tab -->
+                    <div class="tab-pane fade show active" id="summary" role="tabpanel" aria-labelledby="summary-tab">
+                        <div class="summary-content">
+                            {{ summary | safe }}
+                        </div>
+                    </div>
+                    
+                    <!-- Analysis Tab -->
+                    <div class="tab-pane fade" id="analysis" role="tabpanel" aria-labelledby="analysis-tab">
+                        <div class="analysis-content">
+                            {{ analysis | safe }}
+                        </div>
+                    </div>
+                    
+                    <!-- JSON Tab -->
+                    <div class="tab-pane fade" id="json" role="tabpanel" aria-labelledby="json-tab">
+                        <div class="json-content">
+                            <pre><code id="json-data">{{ result_json }}</code></pre>
+                            <button class="btn btn-sm btn-outline-secondary mt-2" id="copy-json-btn">
+                                <i class="bi bi-clipboard"></i> Copy JSON
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+<style>
+    .verdict-badge {
+        font-size: 1.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        font-weight: bold;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .badge-real {
+        background-color: #d4edda;
+        color: #155724;
+        border: 2px solid #c3e6cb;
+    }
+    
+    .badge-fake {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 2px solid #f5c6cb;
+    }
+    
+    .summary-content, .analysis-content {
+        line-height: 1.6;
+    }
+    
+    .json-content {
+        background-color: #f8f9fa;
+        border-radius: 0.25rem;
+        padding: 1rem;
+    }
+    
+    pre {
+        margin-bottom: 0;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize JSON data
+        try {
+            const resultJson = {{ result_json | safe }};
+            document.getElementById('json-data').textContent = JSON.stringify(resultJson, null, 2);
+        } catch (e) {
+            document.getElementById('json-data').textContent = 'Error loading JSON data';
+        }
+        
+        // Copy JSON button
+        const copyJsonBtn = document.getElementById('copy-json-btn');
+        if (copyJsonBtn) {
+            copyJsonBtn.addEventListener('click', function() {
+                const jsonData = document.getElementById('json-data').textContent;
+                navigator.clipboard.writeText(jsonData).then(function() {
+                    const originalText = copyJsonBtn.innerHTML;
+                    copyJsonBtn.innerHTML = '<i class="bi bi-check"></i> Copied!';
+                    setTimeout(function() {
+                        copyJsonBtn.innerHTML = originalText;
+                    }, 2000);
+                }).catch(function(err) {
+                    console.error('Could not copy text: ', err);
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}

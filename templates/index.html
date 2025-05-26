@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}DeepFake Detection - Upload{% endblock %}
+
+{% block content %}
+<div class="header text-center">
+    <h1>DeepFake Detection System</h1>
+    <p class="lead">Upload a video to analyze it for potential deepfake manipulation</p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                Upload Video
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data" id="upload-form">
+                    <div class="upload-area" id="drop-area">
+                        <p>Drag and drop a video file here or click to select</p>
+                        <input type="file" name="video" id="file-input" class="form-control" accept=".mp4,.avi,.mov,.wmv,.mkv" style="display: none;">
+                        <button type="button" class="btn btn-outline-primary mt-3" id="select-file-btn">Select Video</button>
+                    </div>
+                    
+                    <div id="file-info" class="alert alert-info" style="display: none;">
+                        <p><strong>Selected file:</strong> <span id="file-name"></span></p>
+                        <p><strong>Size:</strong> <span id="file-size"></span></p>
+                    </div>
+                    
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary" id="upload-btn" disabled>Analyze Video</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                About DeepFake Detection
+            </div>
+            <div class="card-body">
+                <p>This system uses advanced AI techniques to detect manipulated videos, commonly known as deepfakes. The analysis is performed using:</p>
+                <ul>
+                    <li>Deep learning models trained on large datasets of real and fake videos</li>
+                    <li>Frame-by-frame analysis to detect inconsistencies</li>
+                    <li>Multi-agent system for comprehensive analysis and explanation</li>
+                </ul>
+                <p>The system will provide:</p>
+                <ul>
+                    <li>A verdict on whether the video is likely real or fake</li>
+                    <li>Detailed analysis of the detection results</li>
+                    <li>A summary of findings in easy-to-understand language</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dropArea = document.getElementById('drop-area');
+        const fileInput = document.getElementById('file-input');
+        const selectFileBtn = document.getElementById('select-file-btn');
+        const fileInfo = document.getElementById('file-info');
+        const fileName = document.getElementById('file-name');
+        const fileSize = document.getElementById('file-size');
+        const uploadBtn = document.getElementById('upload-btn');
+        const uploadForm = document.getElementById('upload-form');
+        const progressBar = document.querySelector('.progress-bar');
+        const progress = document.querySelector('.progress');
+        
+        // Open file dialog when clicking the select button or drop area
+        selectFileBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        dropArea.addEventListener('click', (e) => {
+            if (e.target !== selectFileBtn) {
+                fileInput.click();
+            }
+        });
+        
+        // Handle file selection
+        fileInput.addEventListener('change', handleFileSelect);
+        
+        // Handle drag and drop
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight, false);
+        });
+        
+        function highlight() {
+            dropArea.classList.add('bg-light');
+        }
+        
+        function unhighlight() {
+            dropArea.classList.remove('bg-light');
+        }
+        
+        dropArea.addEventListener('drop', handleDrop, false);
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileSelect();
+            }
+        }
+        
+        function handleFileSelect() {
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const fileExtension = file.name.split('.').pop().toLowerCase();
+                const allowedExtensions = ['mp4', 'avi', 'mov', 'wmv', 'mkv'];
+                
+                if (allowedExtensions.includes(fileExtension)) {
+                    fileName.textContent = file.name;
+                    fileSize.textContent = formatFileSize(file.size);
+                    fileInfo.style.display = 'block';
+                    uploadBtn.disabled = false;
+                } else {
+                    alert('Invalid file type. Please select a video file (mp4, avi, mov, wmv, mkv).');
+                    fileInput.value = '';
+                    fileInfo.style.display = 'none';
+                    uploadBtn.disabled = true;
+                }
+            } else {
+                fileInfo.style.display = 'none';
+                uploadBtn.disabled = true;
+            }
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // Handle form submission
+        uploadForm.addEventListener('submit', function(e) {
+            if (fileInput.files.length === 0) {
+                e.preventDefault();
+                alert('Please select a video file first.');
+                return;
+            }
+            
+            // Show progress bar
+            progress.style.display = 'block';
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+            
+            // Simulate progress (in a real app, you would use AJAX to track actual progress)
+            let width = 0;
+            const interval = setInterval(function() {
+                if (width >= 90) {
+                    clearInterval(interval);
+                } else {
+                    width += 5;
+                    progressBar.style.width = width + '%';
+                }
+            }, 500);
+        });
+    });
+</script>
+{% endblock %}
